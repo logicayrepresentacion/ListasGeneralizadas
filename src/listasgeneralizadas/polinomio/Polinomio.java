@@ -39,8 +39,10 @@ public class Polinomio {
      * @param termino
      * @return
      */
-    public String[] insertarTerminoCadena(String termino) {
+    public String[] parseCadenaTermino(String termino) {
         String[] partes = termino.split("\\^");
+        // 5x^3 -    [ 5x , 3 ]
+        // 5x^3y^2 -    [ 5x , 3y , 2]
         int posiblesVariables = partes.length - 1;
 
         String[] terminos = new String[(posiblesVariables * 2) + 1];
@@ -49,28 +51,32 @@ public class Polinomio {
             String exponente = partes[posiblesVariables];
             String parteAnterior = partes[posiblesVariables - 1];
             char variable = parteAnterior.charAt(parteAnterior.length() - 1);
-
+            // 5x^3y^2 -    [ 5x , 3y , 2]
+            // y con exponente 2
             posiblesVariables--;
 
             System.out.print(" variable  " + variable);
             System.out.println(" -- exponente  " + exponente);
             int posibleT = partes[posiblesVariables].length() - 1;
+            //[ 5x , 3 , 2]
             partes[posiblesVariables] = partes[posiblesVariables].substring(0, posibleT);
 
             terminos[i] = variable + "";
             terminos[i++] = exponente;
+            //[y, 2, x, 3]
 
         }
         System.out.println(" coeficiente " + partes[0]);
         terminos[terminos.length - 1] = partes[0];
         return terminos;
+        //[y, 2, x, 3, 5]
     }
 
     private NodoPolinomioLG insertarTermino(String[] partes, NodoPolinomioLG nodoCabezaLocal, int referenciaVariable) {
 
         int posiblesVariables = partes.length / 2;
         char primeraVariablePartes = partes[0].charAt(0);
-        
+
         /**
          * Crear el nodo cabeza con la primera variable
          */
@@ -78,22 +84,26 @@ public class Polinomio {
             variables[cv] = primeraVariablePartes;
             nodoCabezaLocal = new NodoPolinomioLG();
             nodoCabezaLocal.setSw(1);
-            nodoCabezaLocal.setCoeficiente( cv );
+            nodoCabezaLocal.setCoeficiente(cv);
             cv++;
         }
-        
+
         int indice = nodoCabezaLocal.getCoeficiente();
         char variableEvaluar = variables[indice];
-        
-        if (  variableEvaluar != primeraVariablePartes  )    ) {
+
+        if (variableEvaluar != primeraVariablePartes) {
+
+        }
+        )
+        {
             String[] completarPartes = new String[2];
-            completarPartes[0] =  nodoCabezaLocal.getCoeficiente() + "";
+            completarPartes[0] = nodoCabezaLocal.getCoeficiente() + "";
             completarPartes[1] = "0";
             String[] partesCompletas = new String[partes.length + 2];
             System.arraycopy(completarPartes, 0, partesCompletas, 0, 2);
             System.arraycopy(partes, 0, partesCompletas, 2, partes.length);
             return insertarTermino(partesCompletas, nodoCabezaLocal);
-        } else {
+        }else {
             int eNuevo = Integer.parseInt(partes[1]);
 
             // Es el nodo a encontrar o a crear
@@ -148,7 +158,7 @@ public class Polinomio {
     public static void main(String[] args) {
         Polinomio polinomio = new Polinomio();
 
-        NodoPolinomioLG nodoCabezaGrande = polinomio.insertarTermino(polinomio.insertarTerminoCadena("5x^3"), null, 0);
+        NodoPolinomioLG nodoCabezaGrande = polinomio.insertarTermino(polinomio.parseCadenaTermino("5x^3"), null, 0);
 
     }
 
