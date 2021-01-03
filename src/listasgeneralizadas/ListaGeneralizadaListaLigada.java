@@ -78,39 +78,45 @@ public class ListaGeneralizadaListaLigada {
         }
     }
 
-    void mostrar() {
+    public String parseHilera() {
+
+        StringBuilder hilera = new StringBuilder();
+
         if (raizLista == null) {
-            System.out.println("()");
+            hilera.append("()");
         } else {
-            System.out.print("(");
+            hilera.append("(");
             Stack<NodoLG> pila = new Stack();
-            NodoLG ulNodo = raizLista;
-            while (ulNodo != null) {
-                if (ulNodo.getSw() == 0) {
-                    char dato = (char) ulNodo.getDato();
-                    System.out.print(dato);
-                    ulNodo = ulNodo.getLiga();
-                    if (ulNodo != null) {
-                        System.out.print(",");
+            // Nodo para recorrer la lista generalizada
+            NodoLG ultimoNodo = raizLista;
+            while (ultimoNodo != null) {
+                if (ultimoNodo.getSw() == 0) {
+                    char dato = (char) ultimoNodo.getDato();
+                    hilera.append(dato);
+                    ultimoNodo = ultimoNodo.getLiga();
+                    if (ultimoNodo != null) {
+                        hilera.append(",");
                     } else {
-                        System.out.print(")");
+                        hilera.append(")");
+                        // Ciclo para ir subiendo en la pila siempre que estemos al final de una sublista
                         while (!pila.empty()) {
-                            ulNodo = pila.pop().getLiga();
-                            if (ulNodo != null) {
-                                System.out.print(",");
+                            ultimoNodo = pila.pop().getLiga();
+                            if (ultimoNodo != null) {
+                                hilera.append(",");
                                 break;
                             } else {
-                                System.out.print(")");
+                                hilera.append(")");
                             }
                         }
                     }
                 } else {
-                    System.out.print("(");
-                    pila.add(ulNodo);
-                    ulNodo = (NodoLG) ulNodo.getDato();
+                    hilera.append("(");
+                    pila.add(ultimoNodo);
+                    ultimoNodo = (NodoLG) ultimoNodo.getDato();
                 }
             }
         }
+        return hilera.toString();
     }
 
 }

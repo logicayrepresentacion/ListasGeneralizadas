@@ -72,14 +72,20 @@ public class Polinomio {
         //[y, 2, x, 3, 5]
     }
 
+    /**
+     *
+     * @param partes Algo parecido a [y, 2, x, 3, 5]
+     * @param nodoCabezaLocal
+     * @param referenciaVariable
+     * @return
+     */
     private NodoPolinomioLG insertarTermino(String[] partes, NodoPolinomioLG nodoCabezaLocal, int referenciaVariable) {
 
         int posiblesVariables = partes.length / 2;
         char primeraVariablePartes = partes[0].charAt(0);
 
-        /**
-         * Crear el nodo cabeza con la primera variable
-         */
+        // Crear o adicionar las variables en el arreglo de variables
+        //Crear el nodo cabeza con la primera variable
         if (nodoCabezaLocal == null) {
             variables[cv] = primeraVariablePartes;
             nodoCabezaLocal = new NodoPolinomioLG();
@@ -88,67 +94,31 @@ public class Polinomio {
             cv++;
         }
 
+        // Ingresar el termino
         int indice = nodoCabezaLocal.getCoeficiente();
-        char variableEvaluar = variables[indice];
+        char variableEvaluarTermino = variables[indice];
+        double coeficiente = Double.parseDouble(partes[partes.length - 1]);
+        NodoPolinomioLG nodoDesdeDonde = nodoCabezaLocal;
+        
 
-        if (variableEvaluar != primeraVariablePartes) {
+            // Buscar el exponente de x en las partes
+            int exponente = buscarExponente(variable, partes);
+            // Me posiciono o creo el nodo x según el exponente
+            NodoPolinomioLG nodoExponente = posicionar(exponente, nodoDesdeDonde);
 
-        }
-        )
-        {
-            String[] completarPartes = new String[2];
-            completarPartes[0] = nodoCabezaLocal.getCoeficiente() + "";
-            completarPartes[1] = "0";
-            String[] partesCompletas = new String[partes.length + 2];
-            System.arraycopy(completarPartes, 0, partesCompletas, 0, 2);
-            System.arraycopy(partes, 0, partesCompletas, 2, partes.length);
-            return insertarTermino(partesCompletas, nodoCabezaLocal);
-        }else {
-            int eNuevo = Integer.parseInt(partes[1]);
-
-            // Es el nodo a encontrar o a crear
-            NodoPolinomioLG nodoCabezaSublista = null;
-            NodoPolinomioLG ultimoTermino = nodoCabezaLocal;
-            NodoPolinomioLG terminoRecorrido = nodoCabezaLocal.getLiga();
-            while (terminoRecorrido != null) {
-                int e = terminoRecorrido.getExponente();
-                if (e > eNuevo) {
-                    ultimoTermino = terminoRecorrido;
-                    terminoRecorrido = terminoRecorrido.getLiga();
-                } else if (e == eNuevo) {
-                    nodoCabezaSublista = (NodoPolinomioLG) terminoRecorrido.getCoeficiente();
-                } else {
-                    break;
-                }
-            }
-
-            /**
-             * Si tengo el nodoCabezaSublista es por que el exponente ya tenia
-             * termino, de lo contrario es un nuevo termino.
-             */
-            if (nodoCabezaSublista == null) {
-                nodoCabezaSublista = new NodoPolinomioLG();
-                nodoCabezaSublista.setExponente(eNuevo);
-                nodoCabezaSublista.setLiga(ultimoTermino.getLiga());
-                ultimoTermino.setLiga(nodoCabezaSublista);
+            if (posiblesVariables - 1 > 0) {
+                nodoExponente.setCoeficiente(coeficiente);
+                nodoExponente.setSw(0);
+                return nodoExponente;
             } else {
-                            //ToDo
+                nodoExponente.setSw(1);
+                eliminoVariable( partes,variable )
+                nodoExponente.setCoeficiente(   insertarTermino ( partes, null,  variable   )    );
             }
 
+            // Si hay más variables en el termino, ingreso a la siguiente.
+        
 
-            if (posiblesVariables > 1) {
-                nodoCabezaSublista.setSw(1);
-                int nuevaLong = partes.length - 2;
-                String[] nuevasPartes = new String[nuevaLong];
-                System.arraycopy(partes, 2, nuevasPartes, 0, nuevaLong);
-                nodoCabezaSublista.setCoeficiente(insertarTermino(nuevasPartes, null, referenciaVariable++));
-            } else if (posiblesVariables == 1) {
-                nodoCabezaSublista.setSw(0);
-                nodoCabezaSublista.setCoeficiente(partes[2]);
-            }
-
-            return nodoCabezaLocal;
-        }
     }
 
     public void mostrar() {

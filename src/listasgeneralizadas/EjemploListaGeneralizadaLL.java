@@ -37,7 +37,7 @@ public class EjemploListaGeneralizadaLL {
         ListaGeneralizadaListaLigada lgll = new ListaGeneralizadaListaLigada();
         lgll.construir(h);
         System.out.print("Hilera final mostrar: " );
-        lgll.mostrar();
+        System.out.print(lgll.parseHilera());
     }
 
 }
