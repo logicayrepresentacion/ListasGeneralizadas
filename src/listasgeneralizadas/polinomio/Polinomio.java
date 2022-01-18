@@ -22,6 +22,8 @@
  */
 package listasgeneralizadas.polinomio;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author Alejandro
@@ -33,91 +35,98 @@ public class Polinomio {
     int cv = 0;
 
     /**
-     * Se ingresa el termino para el polinomio de la forma 5x^3y^2 o de la forma
-     * 7y^1x^3 o de la forma 8 0 de la forma 8z^2
+     * Cadena representa un polinomio escrito de la forma
+     * 5x^3+6x^1y^2-10z^1+8+y^1+8x^4y^2z^1
      *
-     * @param termino
+     * @param cadena
      * @return
      */
-    public String[] parseCadenaTermino(String termino) {
-        String[] partes = termino.split("\\^");
-        // 5x^3 -    [ 5x , 3 ]
-        // 5x^3y^2 -    [ 5x , 3y , 2]
-        int posiblesVariables = partes.length - 1;
+    public NodoPolinomioLG construir(String cadena) {
 
-        String[] terminos = new String[(posiblesVariables * 2) + 1];
-        int i = 0;
-        while (posiblesVariables > 0) {
-            String exponente = partes[posiblesVariables];
-            String parteAnterior = partes[posiblesVariables - 1];
-            char variable = parteAnterior.charAt(parteAnterior.length() - 1);
-            // 5x^3y^2 -    [ 5x , 3y , 2]
-            // y con exponente 2
-            posiblesVariables--;
+        /**
+         * identificar los terminos de la sucesión
+         */
+        ArrayList<String> terminosCadena = Utileria.partirTerminosCadena(cadena);
 
-            System.out.print(" variable  " + variable);
-            System.out.println(" -- exponente  " + exponente);
-            int posibleT = partes[posiblesVariables].length() - 1;
-            //[ 5x , 3 , 2]
-            partes[posiblesVariables] = partes[posiblesVariables].substring(0, posibleT);
-
-            terminos[i] = variable + "";
-            terminos[i++] = exponente;
-            //[y, 2, x, 3]
-
+        /**
+         * Crear las partesTermino para cada termino del polinomio
+         */
+        ArrayList<PartesTermino> terminosPartesTermino = new ArrayList<>();
+        for (String terminoCadena : terminosCadena) {
+            PartesTermino terminoPartesTermino = new PartesTermino(terminoCadena);
+            terminosPartesTermino.add(terminoPartesTermino);
         }
-        System.out.println(" coeficiente " + partes[0]);
-        terminos[terminos.length - 1] = partes[0];
-        return terminos;
-        //[y, 2, x, 3, 5]
+
+        /**
+         * Insertar uno a uno el termino en el polinomioLG con partesTermino
+         * 6x^1y^2
+         */
+        NodoPolinomioLG cabeza = null;
+        boolean primeraVez = true;
+        for (PartesTermino unPartesTermino : terminosPartesTermino) {
+            if (primeraVez) {
+                cabeza = insertarTermino(unPartesTermino, null, null);
+                primeraVez = false;
+            } else {
+                insertarTermino(unPartesTermino, cabeza, null);
+            }
+        }
+
+        return cabeza;
+
     }
 
     /**
+     * Termino
      *
-     * @param partes Algo parecido a [y, 2, x, 3, 5]
+     * @param miPartesTermino
      * @param nodoCabezaLocal
      * @param referenciaVariable
      * @return
      */
-    private NodoPolinomioLG insertarTermino(String[] partes, NodoPolinomioLG nodoCabezaLocal, int referenciaVariable) {
+    public NodoPolinomioLG insertarTermino(PartesTermino miPartesTermino,
+            NodoPolinomioLG nodoCabezaLocal, Character referenciaVariable) {
 
-        int posiblesVariables = partes.length / 2;
-        char primeraVariablePartes = partes[0].charAt(0);
+        int cantidadVariables = miPartesTermino.cantidadVariables();
+        //ToDo validar que pasa si el partesTermino es un escalar al principio
+        //ToDo validar si el orden es xy o yx
 
-        // Crear o adicionar las variables en el arreglo de variables
-        //Crear el nodo cabeza con la primera variable
+        char primeraVariableTermino = miPartesTermino.getPrimeraVariable();
+
+        // Crear o adicionar las variables en el arreglo de variables 
+        // nodo cabeza con la primera variable 
         if (nodoCabezaLocal == null) {
-            variables[cv] = primeraVariablePartes;
+            variables[cv] = primeraVariableTermino;
             nodoCabezaLocal = new NodoPolinomioLG();
             nodoCabezaLocal.setSw(1);
-            nodoCabezaLocal.setCoeficiente(cv);
+            nodoCabezaLocal.setCoeficiente(primeraVariableTermino);
             cv++;
         }
 
-        // Ingresar el termino
-        int indice = nodoCabezaLocal.getCoeficiente();
-        char variableEvaluarTermino = variables[indice];
-        double coeficiente = Double.parseDouble(partes[partes.length - 1]);
-        NodoPolinomioLG nodoDesdeDonde = nodoCabezaLocal;
-        
+        // Ingresar el termino 
+        char variableEvaluarTermino = (char) nodoCabezaLocal.getCoeficiente();
+        double coeficiente = miPartesTermino.getCoeficiente();
 
-            // Buscar el exponente de x en las partes
-            int exponente = buscarExponente(variable, partes);
-            // Me posiciono o creo el nodo x según el exponente
-            NodoPolinomioLG nodoExponente = posicionar(exponente, nodoDesdeDonde);
+        NodoPolinomioLG nodoRecorrido = nodoCabezaLocal;
 
-            if (posiblesVariables - 1 > 0) {
-                nodoExponente.setCoeficiente(coeficiente);
-                nodoExponente.setSw(0);
-                return nodoExponente;
-            } else {
-                nodoExponente.setSw(1);
-                eliminoVariable( partes,variable )
-                nodoExponente.setCoeficiente(   insertarTermino ( partes, null,  variable   )    );
-            }
+        // Buscar el exponente de x en las partes 
+        int exponente = miPartesTermino.buscarExponente(variableEvaluarTermino);
+        // Busque el nodo según el exponente 
+        NodoPolinomioLG nodoExponente = posicionar(exponente, nodoRecorrido);
 
-            // Si hay más variables en el termino, ingreso a la siguiente.
-        
+        miPartesTermino.eliminarVariable(variableEvaluarTermino);
+        if (miPartesTermino.cantidadVariables() <= 0) { // Todo
+            nodoExponente.setCoeficiente(coeficiente);
+            nodoExponente.setSw(0);
+            return nodoCabezaLocal;
+        } else {
+            // OJO, si ya existia el nodoExponente
+            nodoExponente.setSw(1);
+            NodoPolinomioLG nuevaRaiz = insertarTermino(miPartesTermino, null, variableEvaluarTermino);
+            nodoExponente.setCoeficiente(nuevaRaiz);
+        }
+
+        return nodoCabezaLocal;
 
     }
 
@@ -125,11 +134,28 @@ public class Polinomio {
 
     }
 
-    public static void main(String[] args) {
-        Polinomio polinomio = new Polinomio();
+    private NodoPolinomioLG posicionar(int exponente, NodoPolinomioLG nodoRecorrido) {
+        NodoPolinomioLG ultimo = nodoRecorrido;
+        nodoRecorrido = nodoRecorrido.getLiga();
+        while (nodoRecorrido != null) {
+            if (nodoRecorrido.getExponente() > exponente) {
+                ultimo = nodoRecorrido;
+                nodoRecorrido = nodoRecorrido.getLiga();
+            } else if (nodoRecorrido.getExponente() == exponente) {
+                return nodoRecorrido;
+            } else {
+                nodoRecorrido = null;
+            }
+        }
 
-        NodoPolinomioLG nodoCabezaGrande = polinomio.insertarTermino(polinomio.parseCadenaTermino("5x^3"), null, 0);
+        if (nodoRecorrido == null) {
+            nodoRecorrido = new NodoPolinomioLG();
+            nodoRecorrido.setExponente(exponente);
+            nodoRecorrido.setLiga(ultimo.getLiga());
+            ultimo.setLiga(nodoRecorrido);
+        }
 
+        return nodoRecorrido;
     }
 
 }
