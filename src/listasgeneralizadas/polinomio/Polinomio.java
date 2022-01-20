@@ -23,6 +23,7 @@
 package listasgeneralizadas.polinomio;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  *
@@ -31,8 +32,7 @@ import java.util.ArrayList;
 public class Polinomio {
 
     NodoPolinomioLG nodoCabeza;
-    char variables[] = new char[3];
-    int cv = 0;
+    ArrayList<Character> variables = new ArrayList<>();
 
     /**
      * Cadena representa un polinomio escrito de la forma
@@ -41,7 +41,7 @@ public class Polinomio {
      * @param cadena
      * @return
      */
-    public NodoPolinomioLG construir(String cadena) {
+    public NodoPolinomioLG construir(String cadena) throws Exception {
 
         /**
          * identificar los terminos de la sucesión
@@ -64,6 +64,8 @@ public class Polinomio {
         NodoPolinomioLG cabeza = null;
         boolean primeraVez = true;
         for (PartesTermino unPartesTermino : terminosPartesTermino) {
+            //ToDo validar que pasa si el partesTermino es un escalar al principio
+            completarVariables(unPartesTermino);
             if (primeraVez) {
                 cabeza = insertarTermino(unPartesTermino, null, null);
                 primeraVez = false;
@@ -83,24 +85,18 @@ public class Polinomio {
      * @param nodoCabezaLocal
      * @param referenciaVariable
      * @return
+     * @throws java.lang.Exception
      */
     public NodoPolinomioLG insertarTermino(PartesTermino miPartesTermino,
-            NodoPolinomioLG nodoCabezaLocal, Character referenciaVariable) {
-
-        int cantidadVariables = miPartesTermino.cantidadVariables();
-        //ToDo validar que pasa si el partesTermino es un escalar al principio
-        //ToDo validar si el orden es xy o yx
-
-        char primeraVariableTermino = miPartesTermino.getPrimeraVariable();
+            NodoPolinomioLG nodoCabezaLocal, Character referenciaVariable) throws Exception {
 
         // Crear o adicionar las variables en el arreglo de variables 
         // nodo cabeza con la primera variable 
         if (nodoCabezaLocal == null) {
-            variables[cv] = primeraVariableTermino;
+            char primeraVariableTermino = obtenerVariableEvaluar(referenciaVariable);
             nodoCabezaLocal = new NodoPolinomioLG();
             nodoCabezaLocal.setSw(1);
             nodoCabezaLocal.setCoeficiente(primeraVariableTermino);
-            cv++;
         }
 
         // Ingresar el termino 
@@ -115,15 +111,19 @@ public class Polinomio {
         NodoPolinomioLG nodoExponente = posicionar(exponente, nodoRecorrido);
 
         miPartesTermino.eliminarVariable(variableEvaluarTermino);
-        if (miPartesTermino.cantidadVariables() <= 0) { // Todo
+
+        if (termineVariablesEvaluar(variableEvaluarTermino)) { // Todo
             nodoExponente.setCoeficiente(coeficiente);
             nodoExponente.setSw(0);
             return nodoCabezaLocal;
         } else {
-            // OJO, si ya existia el nodoExponente
-            nodoExponente.setSw(1);
-            NodoPolinomioLG nuevaRaiz = insertarTermino(miPartesTermino, null, variableEvaluarTermino);
-            nodoExponente.setCoeficiente(nuevaRaiz);
+            if (nodoExponente.getCoeficiente() == null) {
+                nodoExponente.setSw(1);
+                NodoPolinomioLG nuevaRaiz = insertarTermino(miPartesTermino, null, variableEvaluarTermino);
+                nodoExponente.setCoeficiente(nuevaRaiz);
+            } else {
+                NodoPolinomioLG nuevaRaiz = insertarTermino(miPartesTermino, (NodoPolinomioLG) nodoExponente.getCoeficiente(), variableEvaluarTermino);
+            }
         }
 
         return nodoCabezaLocal;
@@ -156,6 +156,51 @@ public class Polinomio {
         }
 
         return nodoRecorrido;
+    }
+
+    private void completarVariables(PartesTermino miPartesTermino) {
+        ArrayList<Character> variablesTermino = miPartesTermino.getVariables();
+        for (Character variableEvaluar : variablesTermino) {
+            boolean esNueva = true;
+            for (Character variableRecorrido : variables) {
+                if (Objects.equals(variableEvaluar, variableRecorrido)) {
+                    esNueva = false;
+                    break;
+                }
+            }
+            if (esNueva) {
+                variables.add(variableEvaluar);
+            }
+        }
+    }
+
+    private char obtenerVariableEvaluar(Character referenciaVariable) throws Exception {
+
+        if (referenciaVariable == null) {
+            return variables.get(0);
+        }
+        for (int i = 0; i < variables.size(); i++) {
+            if (Objects.equals(variables.get(i), referenciaVariable)) {
+                char retorno = variables.get(++i);
+                return retorno;
+            }
+        }
+
+        throw new Exception("error");
+    }
+
+    private boolean termineVariablesEvaluar(char referenciaVariable) throws Exception {
+        for (int i = 0; i < variables.size(); i++) {
+            if (Objects.equals(variables.get(i), referenciaVariable)) {
+                if (variables.size() - i > 0) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
+
+        throw new Exception("error");
     }
 
 }

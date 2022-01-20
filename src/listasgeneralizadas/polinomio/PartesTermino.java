@@ -5,6 +5,7 @@
  */
 package listasgeneralizadas.polinomio;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -60,11 +61,6 @@ public class PartesTermino {
         return variables.size();
     }
 
-    char getPrimeraVariable() {
-        // Todo - OJO si no hay más variables
-        return variables.keySet().iterator().next();
-    }
-
     double getCoeficiente() {
         return Double.parseDouble(coeficiente);
     }
@@ -81,4 +77,7 @@ public class PartesTermino {
         variables.remove(variableEvaluarTermino);
     }
 
+    ArrayList<Character> getVariables() {
+        return new ArrayList<>(variables.keySet());
+    }
 }
